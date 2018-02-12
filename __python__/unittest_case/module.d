@@ -1,0 +1,10 @@
+build/pkg/darwin_amd64/__python__/unittest_case.a: build/pkg/darwin_amd64/__python__/collections.a
+build/pkg/darwin_amd64/__python__/unittest_case.a: build/pkg/darwin_amd64/__python__/sys.a
+build/pkg/darwin_amd64/__python__/unittest_case.a: build/pkg/darwin_amd64/__python__/functools.a
+build/pkg/darwin_amd64/__python__/unittest_case.a: build/pkg/darwin_amd64/__python__/difflib.a
+build/pkg/darwin_amd64/__python__/unittest_case.a: build/pkg/darwin_amd64/__python__/pprint.a
+build/pkg/darwin_amd64/__python__/unittest_case.a: build/pkg/darwin_amd64/__python__/re.a
+build/pkg/darwin_amd64/__python__/unittest_case.a: build/pkg/darwin_amd64/__python__/types.a
+build/pkg/darwin_amd64/__python__/unittest_case.a: build/pkg/darwin_amd64/__python__/warnings.a
+build/pkg/darwin_amd64/__python__/unittest_case.a: build/pkg/darwin_amd64/__python__/unittest_result.a
+build/pkg/darwin_amd64/__python__/unittest_case.a: build/pkg/darwin_amd64/__python__/unittest_util.a

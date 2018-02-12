@@ -1,0 +1,12 @@
+build/pkg/darwin_amd64/__python__/test/test_threading.a: build/pkg/darwin_amd64/__python__/test.a
+build/pkg/darwin_amd64/__python__/test/test_threading.a: build/pkg/darwin_amd64/__python__/test/test_support.a
+build/pkg/darwin_amd64/__python__/test/test_threading.a: build/pkg/darwin_amd64/__python__/random.a
+build/pkg/darwin_amd64/__python__/test/test_threading.a: build/pkg/darwin_amd64/__python__/re.a
+build/pkg/darwin_amd64/__python__/test/test_threading.a: build/pkg/darwin_amd64/__python__/sys.a
+build/pkg/darwin_amd64/__python__/test/test_threading.a: build/pkg/darwin_amd64/__python__/thread.a
+build/pkg/darwin_amd64/__python__/test/test_threading.a: build/pkg/darwin_amd64/__python__/threading.a
+build/pkg/darwin_amd64/__python__/test/test_threading.a: build/pkg/darwin_amd64/__python__/time.a
+build/pkg/darwin_amd64/__python__/test/test_threading.a: build/pkg/darwin_amd64/__python__/unittest.a
+build/pkg/darwin_amd64/__python__/test/test_threading.a: build/pkg/darwin_amd64/__python__/weakref.a
+build/pkg/darwin_amd64/__python__/test/test_threading.a: build/pkg/darwin_amd64/__python__/os.a
+build/pkg/darwin_amd64/__python__/test/test_threading.a: build/pkg/darwin_amd64/__python__/test/lock_tests.a

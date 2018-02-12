@@ -1,0 +1,13 @@
+build/pkg/darwin_amd64/__python__/os.a: build/pkg/darwin_amd64/__python__/__go__/io/ioutil.a
+build/pkg/darwin_amd64/__python__/os.a: build/pkg/darwin_amd64/__python__/__go__/os.a
+build/pkg/darwin_amd64/__python__/os.a: build/pkg/darwin_amd64/__python__/__go__/path/filepath.a
+build/pkg/darwin_amd64/__python__/os.a: build/pkg/darwin_amd64/__python__/__go__/grumpy.a
+build/pkg/darwin_amd64/__python__/os.a: build/pkg/darwin_amd64/__python__/__go__/reflect.a
+build/pkg/darwin_amd64/__python__/os.a: build/pkg/darwin_amd64/__python__/__go__/runtime.a
+build/pkg/darwin_amd64/__python__/os.a: build/pkg/darwin_amd64/__python__/__go__/syscall.a
+build/pkg/darwin_amd64/__python__/os.a: build/pkg/darwin_amd64/__python__/__go__/sync.a
+build/pkg/darwin_amd64/__python__/os.a: build/pkg/darwin_amd64/__python__/__go__/time.a
+build/pkg/darwin_amd64/__python__/os.a: build/pkg/darwin_amd64/__python__/_syscall.a
+build/pkg/darwin_amd64/__python__/os.a: build/pkg/darwin_amd64/__python__/os/path.a
+build/pkg/darwin_amd64/__python__/os.a: build/pkg/darwin_amd64/__python__/stat.a
+build/pkg/darwin_amd64/__python__/os.a: build/pkg/darwin_amd64/__python__/sys.a

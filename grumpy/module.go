@@ -26,7 +26,7 @@ import (
 type moduleState int
 
 const (
-	moduleStateNew moduleState = iota
+	moduleStateNew          moduleState = iota
 	moduleStateInitializing
 	moduleStateReady
 )
@@ -36,6 +36,7 @@ var (
 	moduleRegistry = map[string]*Code{}
 	// ModuleType is the object representing the Python 'module' type.
 	ModuleType = newBasisType("module", reflect.TypeOf(Module{}), toModuleUnsafe, ObjectType)
+
 	// SysModules is the global dict of imported modules, aka sys.modules.
 	SysModules = NewDict()
 )
@@ -97,14 +98,22 @@ func ImportModule(f *Frame, name string) ([]*Object, *BaseException) {
 	parts := strings.Split(name, ".")
 	numParts := len(parts)
 	result := make([]*Object, numParts)
+
 	var prev *Object
 	for i := 0; i < numParts; i++ {
+		// package逐步细化
 		name := strings.Join(parts[:i+1], ".")
+
+		// import进来的pacakge，作为prev的一个属性
 		o, raised := importOne(f, name)
+
 		if raised != nil {
 			return nil, raised
 		}
 		if prev != nil {
+			// 通过SetAttr来记录各自的关系？
+			// Global如何使用呢？
+			// 似乎从一开始就慢慢引入？
 			if raised := SetAttr(f, prev, NewStr(parts[i]), o); raised != nil {
 				return nil, raised
 			}
@@ -121,24 +130,32 @@ func importOne(f *Frame, name string) (*Object, *BaseException) {
 	// sys.modules consistency gotchas.
 	importMutex.Lock()
 	o, raised := SysModules.GetItemString(f, name)
+
 	if raised == nil && o == nil {
+		// 从name获取module，找不到就报错
 		if c = moduleRegistry[name]; c == nil {
 			raised = f.RaiseType(ImportErrorType, name)
 		} else {
+			// 找到，则构建module
 			o = newModule(name, c.filename).ToObject()
-			raised = SysModules.SetItemString(f, name, o)
+			raised = SysModules.SetItemString(f, name, o) // 全局唯一，但是不一定在某个模块可见
 		}
 	}
 	importMutex.Unlock()
 	if raised != nil {
 		return nil, raised
 	}
+
 	if o.isInstance(ModuleType) {
 		var raised *BaseException
+		// 在module内部加锁，锁的sharding
 		m := toModuleUnsafe(o)
 		m.mutex.Lock(f)
 		if m.state == moduleStateNew {
 			m.state = moduleStateInitializing
+
+			// 在module对应的环境中执行逻辑
+			// 各个Module中对应的熟悉在Dict()中定义，而不是被Frame的globals给带走了
 			if _, raised = c.Eval(f, m.Dict(), nil, nil); raised == nil {
 				m.state = moduleStateReady
 			} else {
@@ -158,6 +175,7 @@ func importOne(f *Frame, name string) (*Object, *BaseException) {
 		if raised != nil {
 			return nil, raised
 		}
+
 		// The result should be what's in sys.modules, not
 		// necessarily the originally created module since this
 		// is CPython's behavior.
@@ -181,6 +199,8 @@ func importOne(f *Frame, name string) (*Object, *BaseException) {
 // newModule creates a new Module object with the given fully qualified name
 // (e.g a.b.c) and its corresponding Python filename.
 func newModule(name, filename string) *Module {
+	// Module 文件名，模块名
+	// 每一个module都有自己的作用域，独立拥有自己的Dict
 	d := newStringDict(map[string]*Object{
 		"__file__": NewStr(filename).ToObject(),
 		"__name__": NewStr(name).ToObject(),
@@ -284,15 +304,23 @@ func RunMain(code *Code) int {
 		}
 		defer pprof.StopCPUProfile()
 	}
+
+	// 构建__main__模块
 	m := newModule("__main__", code.filename)
 	m.state = moduleStateInitializing
+
+	// 构建RootFrame
 	f := NewRootFrame()
 	f.code = code
-	f.globals = m.Dict()
+	f.globals = m.Dict() // 初始化的Frame
+
 	if raised := SysModules.SetItemString(f, "__main__", m.ToObject()); raised != nil {
 		Stderr.writeString(raised.String())
 	}
+
+	// 直接执行main函数
 	_, e := code.fn(f, nil)
+
 	if e == nil {
 		return 0
 	}

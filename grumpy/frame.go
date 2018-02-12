@@ -36,7 +36,7 @@ type Frame struct {
 	// include exception handlers and finally blocks.
 	checkpoints []RunState
 	state       RunState
-	globals     *Dict `attr:"f_globals"`
+	globals     *Dict `attr:"f_globals"` // 自定义的Dict, 兼容Python的类型
 	lineno      int   `attr:"f_lineno"`
 	code        *Code `attr:"f_code"`
 	taken       bool
@@ -49,9 +49,22 @@ func NewRootFrame() *Frame {
 	return f
 }
 
+func NewRootFrameWithMeta(code, filename string) *Frame {
+	d := newStringDict(map[string]*Object{
+		"__file__": NewStr(filename).ToObject(),
+		"__name__": NewStr(filename).ToObject(),
+	})
+
+	f := &Frame{Object: Object{typ: FrameType}}
+	f.pushFrame(nil)
+	f.globals = d // 赋值全局变量
+	return f
+}
+
 // newChildFrame creates a new Frame whose parent frame is back.
 func newChildFrame(back *Frame) *Frame {
 	f := back.frameCache
+
 	if f == nil {
 		f = &Frame{Object: Object{typ: FrameType}}
 	} else {
@@ -243,6 +256,8 @@ func (f *Frame) MakeArgs(n int) Args {
 	if numEntries == 0 {
 		return make(Args, n, argsCacheArgc)
 	}
+
+	// 从stack中获取 Args对象
 	args := f.threadState.argsCache[numEntries-1]
 	f.threadState.argsCache = f.threadState.argsCache[:numEntries-1]
 	return args[:n]
@@ -252,13 +267,18 @@ func (f *Frame) MakeArgs(n int) Args {
 // later be returned by calls to MakeArgs and therefore references to slices of
 // args should not be held.
 func (f *Frame) FreeArgs(args Args) {
+	// 1. 太小了不要
 	if cap(args) < argsCacheArgc {
 		return
 	}
+
+	// 2. 满了也不回收
 	numEntries := len(f.threadState.argsCache)
 	if numEntries >= argsCacheSize {
 		return
 	}
+
+	// 3. 回收内容
 	// Clear args so we don't unnecessarily hold references.
 	for i := len(args) - 1; i >= 0; i-- {
 		args[i] = nil

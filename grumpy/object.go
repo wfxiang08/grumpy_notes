@@ -62,6 +62,9 @@ func (o *Object) Call(f *Frame, args Args, kwargs KWArgs) (*Object, *BaseExcepti
 	if call == nil {
 		return nil, f.RaiseType(TypeErrorType, fmt.Sprintf("'%s' object is not callable", o.Type().Name()))
 	}
+
+	// 通过Call.Fn来执行
+	// Frame的作用？
 	return call.Fn(f, o, args, kwargs)
 }
 

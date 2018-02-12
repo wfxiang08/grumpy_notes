@@ -31,7 +31,7 @@ type Param struct {
 type ParamSpec struct {
 	Count       int
 	name        string
-	minArgs     int
+	minArgs     int // 最小必须输入的参数个数
 	varArgIndex int
 	kwArgIndex  int
 	params      []Param
@@ -41,12 +41,15 @@ type ParamSpec struct {
 // parameters and optional vararg and/or kwarg parameter.
 func NewParamSpec(name string, params []Param, varArg bool, kwArg bool) *ParamSpec {
 	s := &ParamSpec{name: name, params: params, varArgIndex: -1, kwArgIndex: -1}
+
 	numParams := len(params)
 	for ; s.minArgs < numParams; s.minArgs++ {
 		if params[s.minArgs].Def != nil {
 			break
 		}
 	}
+
+	// 检查代码的有效性
 	for _, p := range params[s.minArgs:numParams] {
 		if p.Def == nil {
 			format := "%s() non-keyword arg %s after keyword arg"

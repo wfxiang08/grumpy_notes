@@ -68,6 +68,7 @@ func newClass(f *Frame, meta *Type, name string, bases []*Type, dict *Dict) (*Ty
 		return nil, f.RaiseType(TypeErrorType, "class layout error")
 	}
 	t := newType(meta, name, basis, bases, dict)
+
 	// Populate slots for any special methods overridden in dict.
 	slotsValue := reflect.ValueOf(&t.slots).Elem()
 	for i := 0; i < numSlots; i++ {
@@ -129,9 +130,11 @@ func newBasisType(name string, basis reflect.Type, basisFunc interface{}, base *
 		logFatal(fmt.Sprintf("expected basis func of type func(*Object) *%s", nativeTypeName(basis)))
 	}
 	t := newType(TypeType, name, basis, []*Type{base}, nil)
+
 	t.slots.Basis = &basisSlot{func(o *Object) reflect.Value {
 		return basisFuncValue.Call([]reflect.Value{reflect.ValueOf(o)})[0].Elem()
 	}}
+
 	basisTypes[basis] = t
 	return t
 }

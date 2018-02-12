@@ -33,19 +33,22 @@ const (
 
 // Code represents Python 'code' objects.
 type Code struct {
-	Object
+	Object // Code也是一个对象，有自己基本的属性：package，文件名，等
 	name     string `attr:"co_name"`
 	filename string `attr:"co_filename"`
 	// argc is the number of positional arguments.
 	argc      int      `attr:"co_argcount"`
 	flags     CodeFlag `attr:"co_flags"`
 	paramSpec *ParamSpec
-	fn        func(*Frame, []*Object) (*Object, *BaseException)
+	fn        func(*Frame, []*Object) (*Object, *BaseException) // Code最终需要有一个可执行的片段，例如：package的初始化
 }
 
 // NewCode creates a new Code object that executes the given fn.
-func NewCode(name, filename string, params []Param, flags CodeFlag, fn func(*Frame, []*Object) (*Object, *BaseException)) *Code {
+func NewCode(name, filename string, params []Param, flags CodeFlag,
+	fn func(*Frame, []*Object) (*Object, *BaseException)) *Code {
+	// 构建一块Code
 	s := NewParamSpec(name, params, flags&CodeFlagVarArg != 0, flags&CodeFlagKWArg != 0)
+
 	return &Code{Object{typ: CodeType}, name, filename, len(params), flags, s, fn}
 }
 
@@ -55,17 +58,27 @@ func toCodeUnsafe(o *Object) *Code {
 
 // Eval runs the code object c in the context of the given globals.
 func (c *Code) Eval(f *Frame, globals *Dict, args Args, kwargs KWArgs) (*Object, *BaseException) {
+	// 如何执行代码呢？
 	validated := f.MakeArgs(c.paramSpec.Count)
+
+	// 处理好参数的逻辑
 	if raised := c.paramSpec.Validate(f, validated, args, kwargs); raised != nil {
 		return nil, raised
 	}
 	oldExc, oldTraceback := f.ExcInfo()
+
+	// 创建新的Frame, 使用globals来替换
 	next := newChildFrame(f)
 	next.code = c
 	next.globals = globals
+
+	// 执行Codedefn
 	ret, raised := c.fn(next, validated)
 	next.release()
+
+	// 回收内存
 	f.FreeArgs(validated)
+
 	if raised == nil {
 		// Restore exc_info to what it was when we left the previous
 		// frame.

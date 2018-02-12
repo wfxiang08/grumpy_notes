@@ -395,6 +395,7 @@ func (d *Dict) putItem(f *Frame, key, value *Object, overwrite bool) (*Object, *
 	if raised != nil {
 		return nil, raised
 	}
+	// 很多时候f基本上没有太多的作用，可能是作为一个Context提供出错处理等逻辑
 	d.mutex.Lock(f)
 	t := d.table
 	v := d.version

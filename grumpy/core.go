@@ -270,7 +270,8 @@ func GT(f *Frame, v, w *Object) (*Object, *BaseException) {
 
 // Hash returns the hash of o according to its __hash__ operator.
 func Hash(f *Frame, o *Object) (*Int, *BaseException) {
-	hash := o.typ.slots.Hash
+
+	hash := o.typ.slots.Hash // 如何获取类型相关的信息呢？
 	if hash == nil {
 		_, raised := hashNotImplemented(f, o)
 		return nil, raised
@@ -1280,6 +1281,7 @@ func hashNotImplemented(f *Frame, o *Object) (*Object, *BaseException) {
 
 // pyPrint encapsulates the logic of the Python print function.
 func pyPrint(f *Frame, args Args, sep, end string, file *File) *BaseException {
+	// fmt.Printf("pyPrint: \nb")
 	for i, arg := range args {
 		if i > 0 {
 			err := file.writeString(sep)
@@ -1292,7 +1294,6 @@ func pyPrint(f *Frame, args Args, sep, end string, file *File) *BaseException {
 		if raised != nil {
 			return raised
 		}
-
 		err := file.writeString(s.Value())
 		if err != nil {
 			return f.RaiseType(IOErrorType, err.Error())

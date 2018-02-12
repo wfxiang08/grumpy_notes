@@ -50,6 +50,7 @@ const (
 // InternStr adds s to the interned string map. Subsequent calls to NewStr()
 // will return the same underlying Str. InternStr is not thread safe and should
 // only be called during module initialization time.
+// 非线程安全的，因此只在初始化阶段使用
 func InternStr(s string) *Str {
 	str, _ := internedStrs[s]
 	if str == nil {
@@ -86,6 +87,8 @@ func toStrUnsafe(o *Object) *Str {
 // NOTE: Decoding UTF-8 data containing surrogates (e.g. U+D800 encoded as
 // '\xed\xa0\x80') will raise UnicodeDecodeError consistent with CPython 3.x
 // but different than 2.x.
+// f似乎只用用来RaiseType
+//
 func (s *Str) Decode(f *Frame, encoding, errors string) (*Unicode, *BaseException) {
 	// TODO: Support custom encodings and error handlers.
 	normalized := normalizeEncoding(encoding)
@@ -971,6 +974,8 @@ func initStrType(dict map[string]*Object) {
 	StrType.slots.GE = &binaryOpSlot{strGE}
 	StrType.slots.GetItem = &binaryOpSlot{strGetItem}
 	StrType.slots.GT = &binaryOpSlot{strGT}
+
+	// 初始化
 	StrType.slots.Hash = &unaryOpSlot{strHash}
 	StrType.slots.LE = &binaryOpSlot{strLE}
 	StrType.slots.Len = &unaryOpSlot{strLen}

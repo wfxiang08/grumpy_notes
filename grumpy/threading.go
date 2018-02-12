@@ -46,11 +46,12 @@ func newThreadState() *threadState {
 	return &threadState{argsCache: make([]Args, 0, argsCacheSize)}
 }
 
+// 如何实现一个可重入的Mutex
 // recursiveMutex implements a typical reentrant lock, similar to Python's
 // RLock. Lock can be called multiple times for the same frame stack.
 type recursiveMutex struct {
 	mutex       sync.Mutex
-	threadState *threadState
+	threadState *threadState // threadState作为go func的标志，这个信息放在Frame中
 	count       int
 }
 

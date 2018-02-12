@@ -33,7 +33,7 @@ var (
 
 // Int represents Python 'int' objects.
 type Int struct {
-	Object
+	Object // 每个对象都包含一个Object实例
 	value int
 }
 
@@ -45,6 +45,8 @@ func NewInt(value int) *Int {
 	return &Int{Object{typ: IntType}, value}
 }
 
+// 在Python内部，所有的对象都通过Object来表示
+// 对象指针转换，可以是实现 Object <---> 对象的转换
 func toIntUnsafe(o *Object) *Int {
 	return (*Int)(o.toPointer())
 }

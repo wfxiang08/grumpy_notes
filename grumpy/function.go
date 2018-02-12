@@ -89,12 +89,17 @@ type Function struct {
 // number of arguments are provided, populating *args and **kwargs if
 // necessary, etc.
 func NewFunction(c *Code, globals *Dict) *Function {
-	return &Function{Object{typ: FunctionType, dict: NewDict()}, nil, c.name, c, globals}
+	// Function是如何定义的呢？
+	// 有Code， 以及自己的Globals(一般来自函数定义的时候的package，闭包等等）
+	return &Function{Object{typ: FunctionType, dict: NewDict()},
+		nil, c.name,
+		c, globals}
 }
 
 // newBuiltinFunction returns a function object with the given name that
 // invokes fn when called.
 func newBuiltinFunction(name string, fn Func) *Function {
+	// 直接使用已有的Func，基本上只有build-in是这种形式了
 	return &Function{Object: Object{typ: FunctionType, dict: NewDict()}, fn: fn, name: name}
 }
 
@@ -112,12 +117,19 @@ func (f *Function) Name() string {
 	return f.name
 }
 
+// 如何执行函数呢？
 func functionCall(f *Frame, callable *Object, args Args, kwargs KWArgs) (*Object, *BaseException) {
+	// Object --> Func
 	fun := toFunctionUnsafe(callable)
+
+	// func 或 fun.code.Eval
+	//
 	code := fun.code
 	if code == nil {
 		return fun.fn(f, args, kwargs)
 	}
+
+	// 函数调用：自己依赖的globals，以及外部传递过来的参数
 	return code.Eval(f, fun.globals, args, kwargs)
 }
 
